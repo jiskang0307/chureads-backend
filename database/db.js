@@ -8,7 +8,7 @@ export const connectDB = async () => {
     if (db) return db
 
     //DB연결
-    const MONGODB_URI = MONGODB_URI_ATLAS;
+    const MONGODB_URI = process.env.MONGODB_URI_ATLAS;
     // const MONGODB_URI = process.env.NODE_ENV === "development" ? process.env.MONGODB_URI_LOCAL : process.env.MONGODB_URI_ATLAS
     const client = new MongoClient(MONGODB_URI);
     await client.connect();
