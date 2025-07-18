@@ -1,6 +1,7 @@
 import express from "express"
 import { generateTags } from "../services/tagService.js";
 import { ObjectId } from "mongodb"
+import { broadcastToClients } from "../sse/sseManager.js";
 
 //게시물 관련 모든 API의 엔드포인트를 관리하는 라우터
 const router = express.Router();
@@ -52,9 +53,19 @@ router.post("/", async (req, res) => {
       tags,
       createdAt: new Date(),
     };
-    const result = await collection.insertOne(newItem);
 
-    // TODO: 새 게시물 알림을 모든 클라이언트에게 전송
+    const result = await collection.insertOne(newItem);
+    //새 게시물 알림을 모든 클라이언트에게 전송
+    broadcastToClients("newPost", {
+      postID: result.insertedId,
+      userName: newItem.userName,
+      content: newItem.content.substring(0, 20) + (newItem.content.length > 20 ? "..." : ""),
+      createdAt: newItem.createdAt,
+      message: `New post from ${newItem.userName}!`
+    });
+
+
+
     res.status(201).json({ ...result, tags });
   } catch (error) {
     console.log(error);
